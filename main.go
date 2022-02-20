@@ -39,9 +39,6 @@ func schemaHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if code != 0 {
-        w.WriteHeader(code)
-    }
-
+    w.WriteHeader(code)
     w.Write(response)
 }

@@ -6,3 +6,8 @@ func storeSchema(id string, schema []byte) bool {
     schemas[id] = schema
     return true
 }
+
+func getSchema(id string) ([]byte, bool) {
+    schema, ok := schemas[id]
+    return schema, ok
+}

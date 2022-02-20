@@ -1,6 +1,7 @@
 package schema
 
 import (
+    "bytes"
     "encoding/json"
     "net/http"
 )
@@ -44,20 +45,30 @@ func Upload(id string, schema []byte) ([]byte, int) {
         code = http.StatusInternalServerError
     }
 
-    json, _ := json.MarshalIndent(resp, "", "  ")
-    return json, code
+    return binary(resp), code
 }
 
 func Get(id string) ([]byte, int) {
-    r := Response{
+    resp := Response{
         Action: ACTION_GET,
         Id: id,
         Status: ERROR,
-        Message: "Not implemented",
     }
+    var code int
 
-    json, _ := json.MarshalIndent(r, "", "  ")
-    return json, http.StatusMethodNotAllowed
+    if checkId(id, &resp, &code) {
+        schema, found := getSchema(id)
+        if !found {
+            resp.Message = "Schema not found"
+            return binary(resp), http.StatusNotFound
+        } else {
+            // Indenting the schema is not necessary, it only
+            // makes the output more readable
+            return indent(schema), http.StatusOK
+        }
+    } else {
+        return binary(resp), code
+    }
 }
 
 func checkId(id string, resp *Response, code *int) bool {
@@ -80,4 +91,16 @@ func checkSchema(schema []byte, resp *Response, code *int) bool {
     }
 
     return true
+}
+
+func binary(resp Response) []byte {
+    json, _ := json.MarshalIndent(resp, "", "  ")
+    return json
+}
+
+func indent(schema []byte) []byte {
+    buf := bytes.NewBuffer(make([]byte, len(schema)))
+    json.Indent(buf, schema, "", "  ")
+
+    return buf.Bytes()
 }
