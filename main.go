@@ -6,10 +6,12 @@ import (
     "net/http"
 
     "github.com/janospapp/json-validator/schema"
+    "github.com/janospapp/json-validator/validator"
 )
 
 func main() {
     http.HandleFunc("/schema/", schemaHandler)
+    http.HandleFunc("/validate/", validateHandler)
     log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
@@ -34,6 +36,30 @@ func schemaHandler(w http.ResponseWriter, r *http.Request) {
         response, code = schema.Upload(id, body)
     case http.MethodGet:
         response, code = schema.Get(id)
+    default:
+        w.WriteHeader(http.StatusMethodNotAllowed)
+        return
+    }
+
+    w.WriteHeader(code)
+    w.Write(response)
+}
+
+func validateHandler(w http.ResponseWriter, r *http.Request) {
+    id := r.URL.Path[len("/validate/"):]
+    var response []byte
+    var code int
+
+    switch r.Method {
+    case http.MethodPost:
+        // See the comment about ReadAll above
+        body, err := io.ReadAll(r.Body)
+        if err != nil {
+            w.WriteHeader(http.StatusBadRequest)
+            return
+        }
+
+        response, code = validator.Check(id, body)
     default:
         w.WriteHeader(http.StatusMethodNotAllowed)
         return

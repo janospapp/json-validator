@@ -57,7 +57,7 @@ func Get(id string) ([]byte, int) {
     var code int
 
     if checkId(id, &resp, &code) {
-        schema, found := getSchema(id)
+        schema, found := GetSchema(id)
         if !found {
             resp.Message = "Schema not found"
             return binary(resp), http.StatusNotFound
