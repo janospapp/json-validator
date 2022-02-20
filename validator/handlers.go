@@ -78,9 +78,37 @@ func validate(id string, doc []byte, schema []byte, resp *Response) {
     sch, err := jsonschema.CompileString(id, bytes.NewBuffer(schema).String())
     var v interface{}
     json.Unmarshal(doc, &v)
+    cleanNulls([]*interface{}{&v})
     if err = sch.Validate(v); err != nil {
         resp.Status = ERROR
         resp.Message = fetchTheFirstError(err.(*jsonschema.ValidationError))
+    }
+}
+
+// This function checks the JSON document level by level starting
+// at the top. If a value is a nested JSON object, then its nil
+// values are deleted and all its other values are added for checks
+// at the next level. It ends when there are no more levels to check.
+func cleanNulls(values []*interface{}) {
+    var rest []*interface{}
+    for _, obj := range values {
+        switch (*obj).(type) {
+        case map[string]interface{}:
+            // The current value is a JSON object, check its values
+            m := (*obj).(map[string]interface{})
+            for k, v := range m {
+                if v == nil {
+                    delete(m, k)
+                } else {
+                    // Add the value for further checking
+                    rest = append(rest, &v)
+                }
+            }
+        }
+    }
+
+    if len(rest) > 0 {
+        cleanNulls(rest)
     }
 }
 
