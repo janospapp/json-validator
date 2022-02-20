@@ -20,7 +20,7 @@ type Response struct {
     Message string `json:"message,omitempty"`
 }
 
-func Upload(id string, schema []byte) ([]byte, int) {
+func Upload(id string, schema []byte, store Store) ([]byte, int) {
     resp := Response{
         Action: ACTION_UPLOAD,
         Id: id,
@@ -36,7 +36,7 @@ func Upload(id string, schema []byte) ([]byte, int) {
     }
 
     if schemaCheck {
-        stored = storeSchema(id, schema)
+        stored = store.storeSchema(id, schema)
     }
 
     if schemaCheck && !stored {
@@ -48,7 +48,7 @@ func Upload(id string, schema []byte) ([]byte, int) {
     return binary(resp), code
 }
 
-func Get(id string) ([]byte, int) {
+func Get(id string, store Store) ([]byte, int) {
     resp := Response{
         Action: ACTION_GET,
         Id: id,
@@ -57,7 +57,7 @@ func Get(id string) ([]byte, int) {
     var code int
 
     if checkId(id, &resp, &code) {
-        schema, found := GetSchema(id)
+        schema, found := store.GetSchema(id)
         if !found {
             resp.Message = "Schema not found"
             return binary(resp), http.StatusNotFound

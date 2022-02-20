@@ -1,13 +1,28 @@
 package schema
 
-var schemas = make(map[string][]byte)
+type Store interface {
+    storeSchema(string, []byte) bool
+    GetSchema(string) ([]byte, bool)
+}
 
-func storeSchema(id string, schema []byte) bool {
-    schemas[id] = schema
+type MemoryStore struct {
+    Schemas map[string][]byte
+}
+
+func NewMemoryStore() *MemoryStore {
+    store := MemoryStore{
+        Schemas: make(map[string][]byte),
+    }
+
+    return &store
+}
+
+func (store *MemoryStore) storeSchema(id string, schema []byte) bool {
+    store.Schemas[id] = schema
     return true
 }
 
-func GetSchema(id string) ([]byte, bool) {
-    schema, ok := schemas[id]
+func (store *MemoryStore) GetSchema(id string) ([]byte, bool) {
+    schema, ok := store.Schemas[id]
     return schema, ok
 }

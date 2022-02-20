@@ -9,7 +9,10 @@ import (
     "github.com/janospapp/json-validator/validator"
 )
 
+var store schema.Store
+
 func main() {
+    store = schema.NewMemoryStore()
     http.HandleFunc("/schema/", schemaHandler)
     http.HandleFunc("/validate/", validateHandler)
     log.Fatal(http.ListenAndServe(":8000", nil))
@@ -33,9 +36,9 @@ func schemaHandler(w http.ResponseWriter, r *http.Request) {
             return
         }
 
-        response, code = schema.Upload(id, body)
+        response, code = schema.Upload(id, body, store)
     case http.MethodGet:
-        response, code = schema.Get(id)
+        response, code = schema.Get(id, store)
     default:
         w.WriteHeader(http.StatusMethodNotAllowed)
         return
@@ -59,7 +62,7 @@ func validateHandler(w http.ResponseWriter, r *http.Request) {
             return
         }
 
-        response, code = validator.Check(id, body)
+        response, code = validator.Check(id, body, store)
     default:
         w.WriteHeader(http.StatusMethodNotAllowed)
         return

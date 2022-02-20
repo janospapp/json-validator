@@ -22,7 +22,7 @@ type Response struct {
     Message string `json:"message,omitempty"`
 }
 
-func Check(id string, doc []byte) ([]byte, int) {
+func Check(id string, doc []byte, store schema.Store) ([]byte, int) {
     resp := Response{
         Action: ACTION,
         Id: id,
@@ -38,7 +38,7 @@ func Check(id string, doc []byte) ([]byte, int) {
     }
 
     if docCheck {
-        sch, schemaFound = schema.GetSchema(id)
+        sch, schemaFound = store.GetSchema(id)
     }
 
     if schemaFound {
