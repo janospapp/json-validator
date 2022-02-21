@@ -5,6 +5,8 @@ import (
     "encoding/json"
     "net/http"
     "testing"
+
+    "github.com/janospapp/json-validator/app"
 )
 
 type BrokenStore struct {}
@@ -24,7 +26,7 @@ func TestUploadEmptyIdSchema(t *testing.T) {
     data := []byte("")
 
     resp, code := Upload(id, data, BrokenStore{})
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Uploading empty id schema must be treated as errors")
     }
 
@@ -38,7 +40,7 @@ func TestUploadInvalidJSONSchema(t *testing.T) {
     data := []byte("{bad: json")
 
     resp, code := Upload(id, data, BrokenStore{})
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Uploading invalid JSON as schema must be treated as error")
     }
 
@@ -52,7 +54,7 @@ func TestUploadFailedToStoreSchema(t *testing.T) {
     data := []byte(`{"type": "object", "properties": []}`)
 
     resp, code := Upload(id, data, BrokenStore{})
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Upload failing to store the schema must be treated as error")
     }
 
@@ -67,7 +69,7 @@ func TestUploadSchemaSuccess(t *testing.T) {
 
     store := NewMemoryStore()
     resp, code := Upload(id, data, store)
-    if r := getResp(resp); r.Status != SUCCESS {
+    if r := getResp(resp); r.Status != app.SUCCESS {
         t.Fatalf("Upload failed with message: %s. Success was expected", r.Message)
     }
 
@@ -80,7 +82,7 @@ func TestGetEmptyIdSchema(t *testing.T) {
     id := ""
 
     resp, code := Get(id, BrokenStore{})
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Getting empty id schema must be treated as error")
     }
 
@@ -93,7 +95,7 @@ func TestGetNonExistenSchema(t *testing.T) {
     id := "sample"
 
     resp, code := Get(id, BrokenStore{})
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Getting non existent schema must be treated as error")
     }
 
@@ -119,8 +121,8 @@ func TestGetSchemaSuccess(t *testing.T) {
     }
 }
 
-func getResp(data []byte) Response {
-    var resp Response
+func getResp(data []byte) app.Response {
+    var resp app.Response
     json.Unmarshal(data, &resp)
     return resp
 }

@@ -4,35 +4,23 @@ import (
     "bytes"
     "encoding/json"
     "net/http"
-)
 
-const (
-    SUCCESS = "success"
-    ERROR = "error"
-    ACTION_UPLOAD = "uploadSchema"
-    ACTION_GET = "getSchema"
+    "github.com/janospapp/json-validator/app"
 )
-
-type Response struct {
-    Action  string `json:"action"`
-    Id      string `json:"id"`
-    Status  string `json:"status"`
-    Message string `json:"message,omitempty"`
-}
 
 func Upload(id string, schema []byte, store Store) ([]byte, int) {
-    resp := Response{
-        Action: ACTION_UPLOAD,
+    resp := app.Response{
+        Action: app.ACTION_UPLOAD,
         Id: id,
-        Status: SUCCESS,
+        Status: app.SUCCESS,
     }
     code := http.StatusCreated
 
     var schemaCheck, stored bool
-    idCheck := checkId(id, &resp, &code)
+    idCheck := CheckId(id, &resp, &code)
 
     if idCheck {
-        schemaCheck = checkSchema(schema, &resp, &code)
+        schemaCheck = app.CheckJSON(schema, &resp, &code)
     }
 
     if schemaCheck {
@@ -40,7 +28,7 @@ func Upload(id string, schema []byte, store Store) ([]byte, int) {
     }
 
     if schemaCheck && !stored {
-        resp.Status = ERROR
+        resp.Status = app.ERROR
         resp.Message = "Couldn't save your schema. Please contact support."
         code = http.StatusInternalServerError
     }
@@ -49,14 +37,14 @@ func Upload(id string, schema []byte, store Store) ([]byte, int) {
 }
 
 func Get(id string, store Store) ([]byte, int) {
-    resp := Response{
-        Action: ACTION_GET,
+    resp := app.Response{
+        Action: app.ACTION_GET,
         Id: id,
-        Status: ERROR,
+        Status: app.ERROR,
     }
     var code int
 
-    if checkId(id, &resp, &code) {
+    if CheckId(id, &resp, &code) {
         schema, found := store.GetSchema(id)
         if !found {
             resp.Message = "Schema not found"
@@ -71,29 +59,7 @@ func Get(id string, store Store) ([]byte, int) {
     }
 }
 
-func checkId(id string, resp *Response, code *int) bool {
-    if id == "" {
-        resp.Status = ERROR
-        resp.Message = "id cannot be empty"
-        *code = http.StatusBadRequest
-        return false
-    }
-
-    return true
-}
-
-func checkSchema(schema []byte, resp *Response, code *int) bool {
-    if !json.Valid(schema) {
-        resp.Status = ERROR
-        resp.Message = "Invalid JSON"
-        *code = http.StatusBadRequest
-        return false
-    }
-
-    return true
-}
-
-func binary(resp Response) []byte {
+func binary(resp app.Response) []byte {
     json, _ := json.MarshalIndent(resp, "", "  ")
     return json
 }

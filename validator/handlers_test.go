@@ -5,6 +5,7 @@ import (
     "net/http"
     "testing"
 
+    "github.com/janospapp/json-validator/app"
     "github.com/janospapp/json-validator/schema"
 )
 
@@ -33,7 +34,7 @@ func TestCheckEmptySchemaId(t *testing.T) {
     store := schema.NewMemoryStore()
 
     resp, code := Check(id, doc, store)
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("ValidateDoc with empty schema id must be an error")
     }
 
@@ -48,7 +49,7 @@ func TestCheckInvalidDocument(t *testing.T) {
     store := schema.NewMemoryStore()
 
     resp, code := Check(id, doc, store)
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Validating invalid JSON document must be an error")
     }
 
@@ -63,7 +64,7 @@ func TestCheckNonExistentSchema(t *testing.T) {
     store := schema.NewMemoryStore()
 
     resp, code := Check(id, doc, store)
-    if r := getResp(resp); r.Status != ERROR {
+    if r := getResp(resp); r.Status != app.ERROR {
         t.Fatal("Validating against non existent schema must be an error")
     }
 
@@ -83,7 +84,7 @@ func TestCheckSuccess(t *testing.T) {
     store.StoreSchema(id, sch)
 
     resp, code := Check(id, doc, store)
-    if r := getResp(resp); r.Status != SUCCESS {
+    if r := getResp(resp); r.Status != app.SUCCESS {
         t.Fatalf("ValidateDoc is expected to succeed. Error: %s", r.Message)
     }
 
@@ -103,7 +104,7 @@ func TestCheckRemovesNullValues(t *testing.T) {
     store.StoreSchema(id, sch)
 
     resp, code := Check(id, doc, store)
-    if r := getResp(resp); r.Status != SUCCESS {
+    if r := getResp(resp); r.Status != app.SUCCESS {
         t.Fatalf("ValidateDoc with null value is expected to succeed. Error: %s", r.Message)
     }
 
@@ -112,8 +113,8 @@ func TestCheckRemovesNullValues(t *testing.T) {
     }
 }
 
-func getResp(data []byte) Response {
-    var resp Response
+func getResp(data []byte) app.Response {
+    var resp app.Response
     json.Unmarshal(data, &resp)
     return resp
 }
