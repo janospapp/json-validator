@@ -16,24 +16,16 @@ func Upload(id string, schema []byte, store Store) ([]byte, int) {
     }
     code := http.StatusCreated
 
-    var schemaCheck, stored bool
-    idCheck := CheckId(id, &resp, &code)
-
-    if idCheck {
-        schemaCheck = app.CheckJSON(schema, &resp, &code)
-    }
-
-    if schemaCheck {
-        stored = store.StoreSchema(id, schema)
-    }
-
-    if schemaCheck && !stored {
+    switch {
+    case CheckId(id, &resp, &code) == false:
+    case app.CheckJSON(schema, &resp, &code) == false:
+    case store.StoreSchema(id, schema) == false:
         resp.Status = app.ERROR
         resp.Message = "Couldn't save your schema. Please contact support."
         code = http.StatusInternalServerError
     }
 
-    return binary(resp), code
+    return resp.Bytes(), code
 }
 
 func Get(id string, store Store) ([]byte, int) {
@@ -44,24 +36,21 @@ func Get(id string, store Store) ([]byte, int) {
     }
     var code int
 
-    if CheckId(id, &resp, &code) {
+    switch {
+    case CheckId(id, &resp, &code) == false:
+    default:
         schema, found := store.GetSchema(id)
         if !found {
             resp.Message = "Schema not found"
-            return binary(resp), http.StatusNotFound
+            code = http.StatusNotFound
         } else {
             // Indenting the schema is not necessary, it only
             // makes the output more readable
             return indent(schema), http.StatusOK
         }
-    } else {
-        return binary(resp), code
     }
-}
 
-func binary(resp app.Response) []byte {
-    json, _ := json.MarshalIndent(resp, "", "  ")
-    return json
+    return resp.Bytes(), code
 }
 
 func indent(schema []byte) []byte {

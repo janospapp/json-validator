@@ -18,25 +18,23 @@ func Check(id string, doc []byte, store schema.Store) ([]byte, int) {
     }
     code := http.StatusOK
 
-    var docCheck, schemaFound bool
-    var sch []byte
+    switch {
+    case schema.CheckId(id, &resp, &code) == false:
+    case app.CheckJSON(doc, &resp, &code) == false:
+    default:
+        var sch []byte
 
-    if schema.CheckId(id, &resp, &code) {
-        docCheck = app.CheckJSON(doc, &resp, &code)
-    }
-
-    if docCheck {
-        sch, schemaFound = store.GetSchema(id)
-        if schemaFound {
-            validate(id, doc, sch, &resp)
-        } else {
+        sch, found := store.GetSchema(id)
+        if !found {
             resp.Status = app.ERROR
             resp.Message = "Schema not found"
             code = http.StatusNotFound
+        } else {
+            validate(id, doc, sch, &resp)
         }
     }
 
-    return binary(resp), code
+    return resp.Bytes(), code
 }
 
 func validate(id string, doc []byte, schema []byte, resp *app.Response) {
@@ -83,9 +81,4 @@ func fetchTheFirstError(err *jsonschema.ValidationError) string {
     } else {
         return "/root" + err.InstanceLocation + ": " + err.Message
     }
-}
-
-func binary(resp app.Response) []byte {
-    json, _ := json.MarshalIndent(resp, "", "  ")
-    return json
 }

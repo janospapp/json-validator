@@ -1,5 +1,7 @@
 package app
 
+import "encoding/json"
+
 const (
     SUCCESS = "success"
     ERROR = "error"
@@ -13,4 +15,9 @@ type Response struct {
     Id      string `json:"id"`
     Status  string `json:"status"`
     Message string `json:"message,omitempty"`
+}
+
+func (resp Response) Bytes() []byte {
+    json, _ := json.MarshalIndent(resp, "", "  ")
+    return json
 }
