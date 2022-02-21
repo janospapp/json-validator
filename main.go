@@ -12,9 +12,15 @@ import (
 var store schema.Store
 
 func main() {
-    store = schema.NewMemoryStore()
+    // A production application would store the schemas
+    // in a robust database, instead of directly on the
+    // filesystem. This is only for persistency in the
+    // exercise.
+    store = schema.NewFileStore()
+
     http.HandleFunc("/schema/", schemaHandler)
     http.HandleFunc("/validate/", validateHandler)
+
     log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
