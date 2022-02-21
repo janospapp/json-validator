@@ -35,6 +35,22 @@ func TestUploadEmptyIdSchema(t *testing.T) {
     }
 }
 
+func TestUploadExistingId(t *testing.T) {
+    id := "saved"
+    data := []byte("")
+    store := NewMemoryStore()
+    store.StoreSchema(id, data)
+
+    resp, code := Upload(id, data, store)
+    if r := getResp(resp); r.Status != app.ERROR {
+        t.Fatal("Uploading not unique schema must be treated as errors")
+    }
+
+    if code != http.StatusConflict {
+        t.Fatalf("Uploading empty id schema status code was %d, expected is 409", code)
+    }
+}
+
 func TestUploadInvalidJSONSchema(t *testing.T) {
     id := "test"
     data := []byte("{bad: json")

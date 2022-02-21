@@ -18,6 +18,7 @@ func Upload(id string, schema []byte, store Store) ([]byte, int) {
 
     switch {
     case CheckId(id, &resp, &code) == false:
+    case UniqueId(id, store, &resp, &code) == false:
     case app.CheckJSON(schema, &resp, &code) == false:
     case store.StoreSchema(id, schema) == false:
         resp.Status = app.ERROR
