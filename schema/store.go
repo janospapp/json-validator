@@ -1,7 +1,7 @@
 package schema
 
 type Store interface {
-    storeSchema(string, []byte) bool
+    StoreSchema(string, []byte) bool
     GetSchema(string) ([]byte, bool)
 }
 
@@ -17,7 +17,7 @@ func NewMemoryStore() *MemoryStore {
     return &store
 }
 
-func (store *MemoryStore) storeSchema(id string, schema []byte) bool {
+func (store *MemoryStore) StoreSchema(id string, schema []byte) bool {
     store.Schemas[id] = schema
     return true
 }

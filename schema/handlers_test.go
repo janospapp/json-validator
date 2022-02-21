@@ -9,7 +9,7 @@ import (
 
 type BrokenStore struct {}
 
-func (BrokenStore) storeSchema(string, []byte) bool {
+func (BrokenStore) StoreSchema(string, []byte) bool {
     // Always report unsuccessful save
     return false
 }
@@ -107,7 +107,7 @@ func TestGetSchemaSuccess(t *testing.T) {
     data := []byte{}
 
     store := NewMemoryStore()
-    store.storeSchema(id, data)
+    store.StoreSchema(id, data)
 
     resp, code := Get(id, store)
     if r := bytes.Compare(resp, data); r != 0 {

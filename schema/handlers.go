@@ -36,7 +36,7 @@ func Upload(id string, schema []byte, store Store) ([]byte, int) {
     }
 
     if schemaCheck {
-        stored = store.storeSchema(id, schema)
+        stored = store.StoreSchema(id, schema)
     }
 
     if schemaCheck && !stored {

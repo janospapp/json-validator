@@ -39,14 +39,13 @@ func Check(id string, doc []byte, store schema.Store) ([]byte, int) {
 
     if docCheck {
         sch, schemaFound = store.GetSchema(id)
-    }
-
-    if schemaFound {
-        validate(id, doc, sch, &resp)
-    } else {
-        resp.Status = ERROR
-        resp.Message = "Schema not found"
-        code = http.StatusNotFound
+        if schemaFound {
+            validate(id, doc, sch, &resp)
+        } else {
+            resp.Status = ERROR
+            resp.Message = "Schema not found"
+            code = http.StatusNotFound
+        }
     }
 
     return binary(resp), code
