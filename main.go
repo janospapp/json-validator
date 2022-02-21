@@ -12,6 +12,8 @@ import (
 var store schema.Store
 
 func main() {
+    log.SetPrefix("json-validator: ")
+    log.SetFlags(0)
     // A production application would store the schemas
     // in a robust database, instead of directly on the
     // filesystem. This is only for persistency in the
@@ -38,6 +40,7 @@ func schemaHandler(w http.ResponseWriter, r *http.Request) {
         // This would be covered by a proper web framework.
         body, err := io.ReadAll(r.Body)
         if err != nil {
+            log.Printf("Couldn't read request body due to '%s'\n", err)
             w.WriteHeader(http.StatusBadRequest)
             return
         }
@@ -64,6 +67,7 @@ func validateHandler(w http.ResponseWriter, r *http.Request) {
         // See the comment about ReadAll above
         body, err := io.ReadAll(r.Body)
         if err != nil {
+            log.Printf("Couldn't read request body due to '%s'\n", err)
             w.WriteHeader(http.StatusBadRequest)
             return
         }

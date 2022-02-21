@@ -2,6 +2,7 @@ package schema
 
 import (
     "errors"
+    "log"
     "os"
 )
 
@@ -47,15 +48,24 @@ func NewFileStore() *FileStore {
 func (store *FileStore) StoreSchema(id string, schema []byte) bool {
     // Ensure that the directory exists
     if _, err := os.Stat(store.BaseDir); errors.Is(err, os.ErrNotExist) {
-        os.Mkdir(store.BaseDir, 0744)
+        err = os.Mkdir(store.BaseDir, 0744)
+        if err != nil {
+            log.Printf("Couldn't create schema directory: %s\n", err)
+        }
     }
 
     err := os.WriteFile(store.getPath(id), schema, 0644)
+    if err != nil {
+        log.Printf("Couldn't save schema: %s\n", err)
+    }
     return err == nil
 }
 
 func (store *FileStore) GetSchema(id string) ([]byte, bool) {
     schema, err := os.ReadFile(store.getPath(id))
+    if err != nil {
+        log.Printf("Couldn't read schema: %s\n", err)
+    }
     return schema, err == nil
 }
 
