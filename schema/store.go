@@ -9,6 +9,7 @@ import (
 type Store interface {
     StoreSchema(string, []byte) bool
     GetSchema(string) ([]byte, bool)
+    Exists(string) bool
 }
 
 type MemoryStore struct {
@@ -31,6 +32,11 @@ func (store *MemoryStore) StoreSchema(id string, schema []byte) bool {
 func (store *MemoryStore) GetSchema(id string) ([]byte, bool) {
     schema, ok := store.Schemas[id]
     return schema, ok
+}
+
+func (store *MemoryStore) Exists(id string) bool {
+    _, found := store.Schemas[id]
+    return found
 }
 
 type FileStore struct {
@@ -67,6 +73,11 @@ func (store *FileStore) GetSchema(id string) ([]byte, bool) {
         log.Printf("Couldn't read schema: %s\n", err)
     }
     return schema, err == nil
+}
+
+func (store *FileStore) Exists(id string) bool {
+    _, err := os.Stat(store.getPath(id))
+    return !errors.Is(err, os.ErrNotExist)
 }
 
 func (store *FileStore) getPath(name string) string {

@@ -21,6 +21,10 @@ func (BrokenStore) GetSchema(string) ([]byte, bool) {
     return nil, false
 }
 
+func (BrokenStore) Exists(string) bool {
+    return false
+}
+
 func TestUploadEmptyIdSchema(t *testing.T) {
     id := ""
     data := []byte("")

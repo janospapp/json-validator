@@ -18,12 +18,12 @@ func CheckId(id string, resp *app.Response, code *int) bool {
 }
 
 func UniqueId(id string, store Store, resp *app.Response, code *int) bool {
-    _, found := store.GetSchema(id)
-    if found {
+    exists := store.Exists(id)
+    if exists {
         resp.Status = app.ERROR
         resp.Message = "Schema already exists"
         *code = http.StatusConflict
     }
 
-    return !found
+    return !exists
 }
